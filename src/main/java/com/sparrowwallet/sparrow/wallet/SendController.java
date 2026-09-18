@@ -149,6 +149,9 @@ public class SendController extends WalletFormController implements Initializabl
     private Label optInStatus;
 
     @FXML
+    private CheckBox reverseReplayCheckbox;
+
+    @FXML
     private Button clearButton;
 
     @FXML
@@ -451,6 +454,9 @@ public class SendController extends WalletFormController implements Initializabl
             Config.get().setSendOptimizationStrategy(OptimizationStrategy.PRIVACY);
             updateTransaction();
         });
+        reverseReplayCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            updateTransaction();
+        });
         setPreferredOptimizationStrategy();
         updatePrivacyAnalysis(null);
         updateOptInStatus(null);
@@ -632,9 +638,14 @@ public class SendController extends WalletFormController implements Initializabl
                 //Disable RBF for silent payments (incl change), as we can't guarantee RBF won't be attempted on another device without knowledge to recompute the address if necessary
                 boolean allowRbf = (replacedTransaction == null || replacedTransaction.getTransaction().isReplaceByFee())
                         && wallet.getPolicyType() != PolicyType.SINGLE_SP && payments.stream().noneMatch(payment -> payment instanceof SilentPayment);
+                
+                List<byte[]> finalOpReturns = new ArrayList<>(opReturnsList);
+                if (reverseReplayCheckbox.isSelected()) {
+                    finalOpReturns.add("no-shrike-replay".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                }
 
                 TransactionParameters params = new TransactionParameters(getUtxoSelectors(payments), getTxoFilters(),
-                        payments, opReturnsList, excludedChangeNodes,
+                        payments, finalOpReturns, excludedChangeNodes,
                         feeRate, getMinimumFeeRate(), minRelayFeeRate, userFee,
                         currentBlockHeight, groupByAddress, includeMempoolOutputs, allowRbf);
                 walletTransactionService = new WalletTransactionService(wallet, params, replacedTransaction);

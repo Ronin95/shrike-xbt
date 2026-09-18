@@ -187,6 +187,12 @@
                         </ToggleButton>
                     </buttons>
                 </SegmentedButton>
+                <Region HBox.hgrow="SOMETIMES" style="-fx-min-width: 15px" />
+                <CheckBox fx:id="reverseReplayCheckbox" text="Reverse Replay Protection">
+                    <tooltip>
+                        <Tooltip text="Injects an OP_RETURN output to prevent this transaction from being replayed on the XBT chain"/>
+                    </tooltip>
+                </CheckBox>
                 <HelpLabel fx:id="optimizationHelp" helpText="Determines whether to optimize the transaction for low fees or greater privacy" />
                 <Label fx:id="privacyAnalysis" graphicTextGap="5" text="Analysis..." styleClass="help-label">
                     <graphic>
